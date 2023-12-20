@@ -1,14 +1,5 @@
 import queue
 
-
-def still_has_unvisited(map):
-    has_unvisited = False
-    for r in map:
-        for c in r:
-            if c == 'U':
-                has_unvisited = True
-    return has_unvisited
-
 def find_neighbors(row, col, numrows, numcols, last_three):
     
     neighbs = []
@@ -43,7 +34,6 @@ def find_in_cost_map(row,col):
             break
     return next_location
 
-
 #f = open("Day17TestInput.txt")
 f = open("Day17TestInput2.txt")
 VERYLARGENUMBER = 100000000000000000000
@@ -60,11 +50,9 @@ number_of_columns = len(raw_map[0])
 number_of_rows = len(raw_map)
 #DONE POPULATING MAP
 
-###UPDATED APPROACH BASED ON ARTICLES
 leadingedge = queue.PriorityQueue()
 last_three = ("Self","Self", "Self")
-#Format is location, priority, actual cost, last three moves BUT me shoving them all into 1 may break PriorityQueue
-#now priority, location, actual cost, last three moves
+#Format is priority, priority, actual cost, last three moves BUT me shoving them all into 1 may break PriorityQueue
 #WIP - Attempting to swap to get priority working
 visited_and_cost_map = []
 
@@ -75,8 +63,8 @@ while leadingedge.empty() == False:
     current_location = leadingedge.get()
     print("Visiting Location: " + str(current_location[1]))
 
-   # if current_location[1] == (number_of_rows-1,number_of_columns-1):
-    #    break
+    if current_location[1] == (number_of_rows-1,number_of_columns-1):
+        break
 
     #get neighbors
     neighbors = find_neighbors(current_location[1][0], current_location[1][1], number_of_rows, number_of_columns, current_location[3])
@@ -101,8 +89,6 @@ while leadingedge.empty() == False:
                 manhattan_x_adder = 3*((number_of_rows - next_candidate[1][0]-1)-3)//3
             manhattan_y_adder = 0
             manattan_y = number_of_columns - next_candidate[1][1]-1
-
-
             if manattan_y > 3:
                 manhattan_y_adder = 3*((number_of_columns - next_candidate[1][1]-1)-3)//3
             priority = new_cost + manhattan_x + manhattan_x_adder + manattan_y + manhattan_y_adder
