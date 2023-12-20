@@ -34,8 +34,8 @@ def find_in_cost_map(row,col):
             break
     return next_location
 
-#f = open("Day17TestInput.txt")
-f = open("Day17TestInput2.txt")
+f = open("Day17TestInput.txt")
+#f = open("Day17TestInput2.txt")
 VERYLARGENUMBER = 100000000000000000000
 
 raw_map = []
@@ -53,7 +53,6 @@ number_of_rows = len(raw_map)
 leadingedge = queue.PriorityQueue()
 last_three = ("Self","Self", "Self")
 #Format is priority, priority, actual cost, last three moves BUT me shoving them all into 1 may break PriorityQueue
-#WIP - Attempting to swap to get priority working
 visited_and_cost_map = []
 
 leadingedge.put((0, (0,0),  0, last_three))
@@ -64,7 +63,7 @@ while leadingedge.empty() == False:
     print("Visiting Location: " + str(current_location[1]))
 
     if current_location[1] == (number_of_rows-1,number_of_columns-1):
-        break
+       break
 
     #get neighbors
     neighbors = find_neighbors(current_location[1][0], current_location[1][1], number_of_rows, number_of_columns, current_location[3])
@@ -82,15 +81,22 @@ while leadingedge.empty() == False:
         if next_candidate[2] == VERYLARGENUMBER or new_cost < next_candidate[2]:
 
             #Use manhattan distance to the end as the priority
-            #TODO - Not getting good weighting on small test input, need to try to update weighting
             manhattan_x = number_of_rows - next_candidate[1][0]-1
             manhattan_x_adder = 0
+            num_downs_already = 0
+            for movement in current_location[3]:
+                if movement == "Down":
+                    num_downs_already += 1
             if manhattan_x > 3:
-                manhattan_x_adder = 3*((number_of_rows - next_candidate[1][0]-1)-3)//3
+                manhattan_x_adder = 3
             manhattan_y_adder = 0
+            num_overs_already = 0
+            for movement in current_location[3]:
+                if movement == "Right":
+                    num_overs_already += 1
             manattan_y = number_of_columns - next_candidate[1][1]-1
             if manattan_y > 3:
-                manhattan_y_adder = 3*((number_of_columns - next_candidate[1][1]-1)-3)//3
+                manhattan_y_adder = 3
             priority = new_cost + manhattan_x + manhattan_x_adder + manattan_y + manhattan_y_adder
 
             #calculate the last three!
