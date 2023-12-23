@@ -1,6 +1,6 @@
 #f = open("Day10TestInput2.txt")
-f = open("Day10TestInput1.txt")
-#f = open("Day10TestInput.txt")
+#f = open("Day10TestInput1.txt")
+f = open("Day10Input.txt")
 
 pipe_maze = []
 path = []
@@ -12,7 +12,8 @@ for l in f:
 for r in pipe_maze:
     if r.__contains__('\n'):
         r.remove('\n') 
-
+start_row = 0
+start_col = 0
 #Find the start
 for r in pipe_maze:
     for c in r:
@@ -75,148 +76,76 @@ while next_char != 'S':
     path.append((next_row, next_col))
 print("Farthest point - " + str((len(path)-1)//2))
 
-#PArt 2 reattempt 
-"""
-| L
-| F
-| |
+#Need to find what shape S has and replace before going into part 2
+start_char = 'S'
+#Find if -
+if path.__contains__((start_row, start_col-1)) and path.__contains__((start_row, start_col+1)):
+    start_char = '-'
+#Find if |
+if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row+1, start_col)):
+    start_char = '|'
+#Find if L
+if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col+1)):
+    start_char = 'L'
+#Find if 7
+if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col-1)):
+    start_char = '7'
+#Find if J
+if path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col-1)):
+    start_char = 'J'
+#Find if F
+if path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col+1)):
+    start_char = 'F'
 
-7 |
-7 F
-7 L
+pipe_maze[start_row][start_col] = start_char
 
-J F
-J |
-J L
-"""
-
+numrows = len(pipe_maze)
+numcols = len(pipe_maze[0])
 contained_cells = 0
-row = 0
-for r in pipe_maze:
-    column = 0
-    counting_cells = False
-    on_path = False
-    for c in r:
-        if counting_cells == True:
-            if path.__contains__((row,column))==False:
-                contained_cells = contained_cells + 1
-                pipe_maze[row][column] = 'Z'
-            elif  (c == 'L' or c == 'F' or c == '|' and path.__contains__((row,column))==True):
-                counting_cells = False
-
-        elif (c == '7' or c == '|' or c == 'J') and path.__contains__((row,column))==True and on_path == False:
-                counting_cells = True
-                on_path = False
-        elif path.__contains__((row,column))==True and on_path == False:
-            on_path = True
-        elif path.__contains__((row,column))==True and on_path == True:
-            on_path = True
+r = 0
+c = 0
+while r < numrows: 
+    c = 0
+    is_counting = False
+    has_seen_partial_L = False
+    has_seen_partial_7 = False
+    has_seen_partial_J = False
+    has_seen_partial_F = False
+    while c < numcols:
+        pc = pipe_maze[r][c]
+        if path.__contains__((r,c)):
+            if pc == '|':
+                is_counting = not is_counting
+            elif pc == 'L':
+                has_seen_partial_L = True
+            elif pc == '7':
+                if has_seen_partial_L == True:
+                    has_seen_partial_L = False
+                    has_seen_partial_7 = False
+                    is_counting = not is_counting
+                elif has_seen_partial_F == True:
+                    has_seen_partial_F = False
+                    has_seen_partial_7 = False
+                else:
+                    has_seen_partial_7 = True
+            elif pc == 'J':
+                if has_seen_partial_L == True:
+                    has_seen_partial_L = False
+                    has_seen_partial_J = False
+                elif has_seen_partial_F == True:
+                    has_seen_partial_F = False
+                    has_seen_partial_J = False
+                    is_counting = not is_counting
+                else:
+                    has_seen_partial_J = True
+            elif pc == 'F':
+                has_seen_partial_F = True 
         else:
-            pipe_maze[row][column] = '0'
-        column = column + 1 
-    row = row + 1
+            if is_counting == True:
+                contained_cells = contained_cells + 1
+        c = c + 1
+    r = r + 1            
 
+print("Contained cells - " + str(contained_cells))
+            
 
-"""
-#Part 2
-contained_cells = 0
-keep_filling = True
-while keep_filling == True:
-    keep_filling = False
-    row = 0
-    for r in pipe_maze:      
-        column = 0
-        for c in r:          
-            changed_char = False
-            if path.__contains__((row,column))==True:
-                changed_char = True
-            if c != 'Z':
-
-                #Start with corners
-                # if it's a top left corner and lower right is not path or Z, make Z
-                if c == 'F' or c == 'S':
-                    if row+1 < len(pipe_maze) and column+1 < len(r) and pipe_maze[row+1][column+1] != 'Z' and path.__contains__((row+1,column+1))==False and path.__contains__((row,column))==True:
-                        pipe_maze[row+1][column+1] = 'Z'
-                        contained_cells = contained_cells + 1
-                        keep_filling = True
-                        changed_char = True
-                    elif path.__contains__((row,column))==False:
-                        pipe_maze[row][column] = '0'
-                        changed_char = True
-                elif c == '7' or c == 'S':
-                    if row+1 < len(pipe_maze) and pipe_maze[row+1][column-1] != 'Z' and path.__contains__((row+1,column-1))==False and path.__contains__((row,column))==True:
-                        pipe_maze[row+1][column-1] = 'Z'
-                        contained_cells = contained_cells + 1
-                        keep_filling = True
-                        changed_char = True
-                    elif path.__contains__((row,column))==False:
-                        pipe_maze[row][column] = '0'
-                        changed_char = True
-                elif c == 'J' or c == 'S':
-                    if pipe_maze[row-1][column-1] != 'Z' and path.__contains__((row-1,column-1))==False and path.__contains__((row,column))==True:
-                        pipe_maze[row-1][column-1] = 'Z'
-                        contained_cells = contained_cells + 1
-                        keep_filling = True
-                        changed_char = True
-                    elif path.__contains__((row,column))==False:
-                        pipe_maze[row][column] = '0'
-                        changed_char = True
-                elif c == 'L' or c == 'S':
-                    if  column+1 < len(r) and pipe_maze[row-1][column+1] != 'Z' and path.__contains__((row-1,column+1))==False and path.__contains__((row,column))==True:
-                        pipe_maze[row-1][column+1] = 'Z'
-                        contained_cells = contained_cells + 1
-                        keep_filling = True
-                        changed_char = True
-                    
-                    elif path.__contains__((row,column))==False:
-                        pipe_maze[row][column] = '0'
-                        changed_char = True
-                
-                #If not in path, path on left, Z above
-                elif path.__contains__((row,column)) == False and column >0 and path.__contains__((row,column-1)) == True and pipe_maze[row-1][column] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-                    
-                #If not in path, path on right, Z above
-                elif path.__contains__((row,column)) == False and column < len(r)-1 and path.__contains__((row,column+1)) == True and pipe_maze[row-1][column] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-                
-                #If not in path, Z on left, path above
-                elif path.__contains__((row,column)) == False and column >0 and path.__contains__((row-1,column)) == True and pipe_maze[row][column-1] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-                    
-                #if not in path, Z on left, Z above
-                elif path.__contains__((row,column)) == False and column >0 and pipe_maze[row-1][column] == 'Z' and pipe_maze[row][column-1] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-
-                # if not in path, Z on right, path above
-                elif path.__contains__((row,column)) == False and column < len(r)-1 and path.__contains__((row-1,column)) == True and pipe_maze[row][column+1] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-
-                # if not in path, Z on right, Z above
-                elif path.__contains__((row,column)) == False and column < len(r)-1 and pipe_maze[row-1][column] == 'Z' and pipe_maze[row][column+1] == 'Z':
-                    pipe_maze[row][column] = 'Z'
-                    contained_cells = contained_cells + 1
-                    keep_filling = True
-                    changed_char = True
-                
-                if changed_char == False and path.__contains__((row,column)) == False:
-                    pipe_maze[row][column] = '0'
-            column = column + 1
-        row = row + 1
-"""
-print("Contained cells - " + str(contained_cells))               
