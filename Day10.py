@@ -82,19 +82,19 @@ start_char = 'S'
 if path.__contains__((start_row, start_col-1)) and path.__contains__((start_row, start_col+1)):
     start_char = '-'
 #Find if |
-if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row+1, start_col)):
+elif path.__contains__((start_row-1, start_col)) and path.__contains__((start_row+1, start_col)):
     start_char = '|'
 #Find if L
-if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col+1)):
+elif path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col+1)):
     start_char = 'L'
 #Find if 7
-if path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col-1)):
+elif path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col-1)):
     start_char = '7'
 #Find if J
-if path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col-1)):
+elif path.__contains__((start_row-1, start_col)) and path.__contains__((start_row, start_col-1)):
     start_char = 'J'
 #Find if F
-if path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col+1)):
+elif path.__contains__((start_row+1, start_col)) and path.__contains__((start_row, start_col+1)):
     start_char = 'F'
 
 pipe_maze[start_row][start_col] = start_char
