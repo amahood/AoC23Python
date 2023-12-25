@@ -1,3 +1,4 @@
+import copy
 class digging_instruction:
     def __init__(self, direction, spaces, color):
         self.direction = direction
@@ -27,18 +28,22 @@ for i in instruction_set:
         for j in range(current_col, current_col+int(i.spaces)):
             current_col = current_col + 1
             dig_map.add(((current_row,current_col), i.color))
+            
     elif i.direction == "L":
         for j in range(current_col, current_col+int(i.spaces)):
             current_col = current_col - 1
             dig_map.add(((current_row,current_col), i.color))
+            
     elif i.direction == "U":
         for j in range(current_row, current_row+int(i.spaces)):
             current_row = current_row - 1
             dig_map.add(((current_row,current_col), i.color))
+
     elif i.direction == "D":
         for j in range(current_row, current_row + int(i.spaces)):
             current_row = current_row + 1
             dig_map.add(((current_row,current_col), i.color))
+
 
 #find the max row and col in dig_map
 max_row = 0
@@ -79,91 +84,59 @@ for i in range(total_rows+1):
 for i in dig_map:
     dig_map_list[i[0][0] + rows_to_add][i[0][1]+cols_to_add] = i[1]
 
+temp_string_to_add_top_bottom = []
+for i in range(total_cols+1):
+    temp_string_to_add_top_bottom.append('.')
+dig_map_list.insert(0, copy.deepcopy(temp_string_to_add_top_bottom))
+dig_map_list.append(copy.deepcopy(temp_string_to_add_top_bottom))
+
+for r in dig_map_list:
+    r.insert(0, '.')
+    r.append('.')
+
 print("Map created.")
 
-running_sum = 0
-rt = 0
-for r in dig_map_list:
-    is_counting = False
-    waiting_for_opening_hash = True
-    waiting_for_closing_hash = False
-    waiting_for_closing_dot = False
-    ct = 0
-    for c in r:
-        #Case for finding first hash in a line
-        if c != '.' and (waiting_for_opening_hash == True and is_counting == False and waiting_for_closing_hash == False and waiting_for_closing_dot == False):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = False
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #Case for handling continuing hashes
-        elif c != '.' and (is_counting == True and waiting_for_closing_hash == False and waiting_for_closing_hash == False and waiting_for_closing_dot == False):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = False
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #Case for first handling counted dots
-        elif c == '.' and (is_counting == True and waiting_for_opening_hash == False and waiting_for_closing_hash == False and waiting_for_closing_dot == False):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = True
-            waiting_for_closing_dot = False
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #case for handling n counted dots
-        elif c == '.' and (is_counting == True and waiting_for_opening_hash == False and waiting_for_closing_hash == True and waiting_for_closing_dot == False):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = True
-            waiting_for_closing_dot = False
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #Case for handling first hash in closing Hash string
-        elif c != '.' and (is_counting == True and waiting_for_opening_hash == False and waiting_for_closing_hash == True and waiting_for_closing_dot == False):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = True
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #case for handling continued hashes in closing hash string
-        elif c != '.' and (is_counting == True and waiting_for_opening_hash == False and waiting_for_closing_hash == False and waiting_for_closing_dot == True):
-            is_counting = True
-            waiting_for_opening_hash = False
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = True
-            running_sum += 1
-            dig_map_list[rt][ct] = 'X'
-        #case for handling transition to stop counting finding dot after closing hashes
-        elif c == '.' and (is_counting == True and waiting_for_opening_hash == False and waiting_for_closing_hash == False and waiting_for_closing_dot == True):
-            is_counting = False
-            waiting_for_opening_hash = True
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = False
-        else:
-            is_counting = False
-            waiting_for_opening_hash = True
-            waiting_for_closing_hash = False
-            waiting_for_closing_dot = False
-        ct += 1
-    rt += 1
+pts_to_check = set()
+vistied_pts = set()
+pts_to_check.add((0,0))
+pts_to_check.add((0,len(dig_map_list[0])-1))
+pts_to_check.add((len(dig_map_list)-1,0))
+pts_to_check.add((len(dig_map_list)-1,len(dig_map_list[0])-1))
 
-print("Running sum: " + str(running_sum))
+while len(pts_to_check) > 0:
+    pt = pts_to_check.pop()
+    if pt not in vistied_pts:
+        vistied_pts.add(pt)
+        #COP GENERATED BELOW HERE, NEED TO CHECK
+        if dig_map_list[pt[0]][pt[1]] == '.':
+            dig_map_list[pt[0]][pt[1]] = 'X'
+            if pt[0] > 0:
+                pts_to_check.add((pt[0]-1, pt[1]))
+            if pt[0] < len(dig_map_list)-1:
+                pts_to_check.add((pt[0]+1, pt[1]))
+            if pt[1] > 0:
+                pts_to_check.add((pt[0], pt[1]-1))
+            if pt[1] < len(dig_map_list[0])-1:
+                pts_to_check.add((pt[0], pt[1]+1))
+
+running_sum = 0
 for r in dig_map_list:
     string_to_print = ""
     for c in r:
         if c == '.':
             string_to_print += '.'
+            running_sum += 1
+        elif c == 'X':
+            string_to_print += 'X'
         else:
-            string_to_print += c
+            string_to_print += '#'
+            running_sum += 1
     print(string_to_print)
 
+print("Running sum: " + str(running_sum))
 
 
+    
         
 
 
