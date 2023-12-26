@@ -7,8 +7,8 @@ class digging_instruction:
 
 instruction_set = []
 
-#f = open("Day18TestInput.txt")
-f = open("Day18Input.txt")
+f = open("Day18TestInput.txt")
+#f = open("Day18Input.txt")
 
 for l in f:
     instruction = l.split()
@@ -16,7 +16,7 @@ for l in f:
     temp_instruction = digging_instruction(instruction[0], instruction[1], instruction[2][2:8])
     instruction_set.append(temp_instruction)
 
-"""
+
 #PArt 2 need to reparwsew instruction set
 for i in instruction_set:
     #convert i.color to decimal and set to i.spaces
@@ -33,7 +33,7 @@ for i in instruction_set:
     elif i.color[5] == '3':
         i.direction = "U"
         i.color = ''
-"""
+
         
 print("Instructions loaded.")
 
@@ -92,36 +92,11 @@ cols_to_add = abs(min_col)
 total_rows = max_row + rows_to_add
 total_cols = max_col + cols_to_add
 
-#initialize full map to . - this seems inefficient - CAN I TRY THIS AS A SET? - Already have this 
-"""
-dig_map_list = []
-for i in range(total_rows+1):
-    temp_dig_row = []
-    for j in range(total_cols+1):
-        temp_dig_row.append('.')
-    dig_map_list.append(temp_dig_row)
-"""
-    
 #REminder - dig map is the set of tuples of locaton and character on the path
     #This is shifting them all to nromalize to 0 and then setting them to the char and adding to set
 for i in dig_map_not_normalized:
     temp_location = (i[0] + rows_to_add, i[1] + cols_to_add)
     dig_map.add(temp_location)
-
-
-"""
-temp_string_to_add_top_bottom = []
-for i in range(total_cols+1):
-    temp_string_to_add_top_bottom.append('.')
-dig_map_list.insert(0, copy.deepcopy(temp_string_to_add_top_bottom))
-dig_map_list.append(copy.deepcopy(temp_string_to_add_top_bottom))
-
-for r in dig_map_list:
-    r.insert(0, '.')
-    r.append('.')
-
-print("Map created.")
-"""
 
 pts_to_check = set()
 vistied_pts = set()
