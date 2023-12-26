@@ -100,7 +100,6 @@ for i in dig_map_not_normalized:
 
 pts_to_check = set()
 vistied_pts = set()
-pts_outside_map = set()
 pts_to_check.add((-1,-1))
 pts_to_check.add((-1,total_cols+1))
 pts_to_check.add((total_rows+1,-1))
@@ -109,12 +108,14 @@ pts_to_check.add((total_rows+1,total_cols+1))
 length = total_rows + 3
 width = total_cols + 3
 
+pts_outside_map = 0
+
 while len(pts_to_check) > 0:
     pt = pts_to_check.pop()
     if pt not in vistied_pts:
         vistied_pts.add(pt)
         if pt not in dig_map:
-            pts_outside_map.add(pt)
+            pts_outside_map += 1
             if pt[0] > -1:
                 pts_to_check.add((pt[0]-1, pt[1]))
             if pt[0] < total_rows+1:
@@ -126,9 +127,9 @@ while len(pts_to_check) > 0:
 print("Dimensions - " + str(length*width))
 print("Visited points - " + str(len(vistied_pts)))
 print("Dig points - " + str(len(dig_map)))
-print("Outside points - " + str(len(pts_outside_map)))
+print("Outside points - " + str(pts_outside_map))
 
-print("Total dug area - " + str(length*width - len(pts_outside_map)))
+print("Total dug area - " + str(length*width - pts_outside_map))
 
 
     
