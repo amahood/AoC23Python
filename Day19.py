@@ -160,14 +160,16 @@ def find_paths_to_a(input_workflow, rules_so_far, workflow_set):
     print("at " + input_workflow.label)
     for r in input_workflow.rules:
         if r.next_workflow == 'A':
-            new_path = copy.deepcopy(local_rsf)
-            new_path.append(r)
-            paths_to_a.append(new_path)
+            #new_path = copy.deepcopy(local_rsf)
+            #new_path.append(r)
+            local_rsf.append(r)
+            paths_to_a.append(local_rsf)
         elif r.next_workflow != 'R':   
-            temp_path = copy.deepcopy(local_rsf)
-            temp_path.append(r)
+            #temp_path = copy.deepcopy(local_rsf)
+            #temp_path.append(r)
+            local_rsf.append(r)
             nw = find_workflow(r.next_workflow, workflow_set)
-            next_layer_paths_to_a = find_paths_to_a(nw, temp_path, workflow_set)
+            next_layer_paths_to_a = find_paths_to_a(nw, local_rsf, workflow_set)
             for path in next_layer_paths_to_a:
                 paths_to_a.append(path)
         
@@ -176,10 +178,19 @@ def find_paths_to_a(input_workflow, rules_so_far, workflow_set):
 empty_list = []
 paths_from_inpoint = find_paths_to_a(inpoint, empty_list, workflows)
 
+# I NOW HAVE ALL THE CONDITIONS BUT NOT WHETHER THEY PASSED OR FAILED TO GET TO THE NEXT STEP
+
+
 for p in paths_from_inpoint:
     path = ""
+    labels = ""
     for w in p:
-        path = path + " " + w.workflow_label
+            labels = labels + " " + w.workflow_label
+            if w.letter != "def":
+                rule_text = w.letter + w.condition + w.value
+                path = path + " " + rule_text
+            
+    print(labels)
     print(path)
 
 
