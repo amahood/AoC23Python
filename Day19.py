@@ -1,5 +1,7 @@
+import copy
 class workflow_rule:
-    def __init__(self, letter, condition, value, next_workflow):
+    def __init__(self, workflow_label, letter, condition, value, next_workflow):
+        self.workflow_label = workflow_label
         self.letter = letter
         self.condition = condition
         self.value = value
@@ -10,9 +12,9 @@ class workflow:
         self.label = label
         self.rules = rules
 
-def parse_workflow_rule(raw_rule):
+def parse_workflow_rule(containing_workflow, raw_rule):
     """
-    In comes a list of rules in a list of strings.  Each string is a rule that needs to be parsed out
+    In comes in the label of containing node and a list of rules in a list of strings.  Each string is a rule that needs to be parsed out
     """
     if raw_rule.__contains__(">") == False and raw_rule.__contains__("<")==False:
         #this is a default next workflow
@@ -25,14 +27,14 @@ def parse_workflow_rule(raw_rule):
         condition = raw_rule[1]
         value = raw_rule.split(":")[0][2:]
         next_workflow = raw_rule.split(":")[1]
-    return workflow_rule(letter, condition, value, next_workflow)
+    return workflow_rule(containing_workflow, letter, condition, value, next_workflow)
 
 def parse_workflow(raw_workflow):
     w_label = raw_workflow.split('{')[0]
     w_rules_raw = raw_workflow.split('{')[1].split('}')[0].split(',')
     w_rules_instances = []
     for rr in w_rules_raw:
-        w_rules_instances.append(parse_workflow_rule(rr))
+        w_rules_instances.append(parse_workflow_rule(w_label, rr))
     return workflow(w_label, w_rules_instances)
 
 def execute_workflow(part, workflow):
@@ -83,8 +85,19 @@ def execute_workflow(part, workflow):
     """
     return result
 
-#f = open("Day19TestInput.txt")
-f = open("Day19Input.txt")
+def find_workflow(label, workflow_set):
+    found = False
+    for w in workflow_set:
+        if w.label == label:
+            found = True
+            return w
+    
+    if found == False:
+        print("ERROR")
+        
+
+f = open("Day19TestInput.txt")
+#f = open("Day19Input.txt")
 
 #read in workflow lines
 raw_workflows = []
@@ -135,5 +148,41 @@ for p in parts:
                     break
     if result == 'A':
         running_sum = running_sum + int(p[0]) + int(p[1]) + int(p[2]) + int(p[3])
-    
+
 print(str(running_sum))
+
+def find_paths_to_a(input_workflow, rules_so_far, workflow_set):
+    paths_to_a = []
+    local_rsf = copy.deepcopy(rules_so_far)
+
+    #parse workflow rules
+    #BUG - But not sure it matters, if a workflow only has rules that end in A, you will get paths for each rule of that node (the lnx bug)
+    print("at " + input_workflow.label)
+    for r in input_workflow.rules:
+        if r.next_workflow == 'A':
+            new_path = copy.deepcopy(local_rsf)
+            new_path.append(r)
+            paths_to_a.append(new_path)
+        elif r.next_workflow != 'R':   
+            temp_path = copy.deepcopy(local_rsf)
+            temp_path.append(r)
+            nw = find_workflow(r.next_workflow, workflow_set)
+            next_layer_paths_to_a = find_paths_to_a(nw, temp_path, workflow_set)
+            for path in next_layer_paths_to_a:
+                paths_to_a.append(path)
+        
+    return paths_to_a
+
+empty_list = []
+paths_from_inpoint = find_paths_to_a(inpoint, empty_list, workflows)
+
+for p in paths_from_inpoint:
+    path = ""
+    for w in p:
+        path = path + " " + w.workflow_label
+    print(path)
+
+
+print("Hold")
+
+
