@@ -5,6 +5,7 @@ class module:
         self.output_connections = outputs
         self.flipflop_currentstate = ""
         self.conj_lastseen = []
+        self.input_connections = []
 
 class pulse:
     def __init__(self, level, destination, origin):
@@ -17,12 +18,16 @@ def process_pulse(inpulse, modules):
 
     #find module for the pulse
     filtered_modules = list(filter(lambda x: x.name == inpulse.destination, modules)) 
-    
+    target_module = filtered_modules[0]
+
     #If there isn't actually a module in the set, liek the test output node in second sample, make a stub node
+    #GOING TO TRY MOVING THIS TO MAIN FUNCTION NOW THAT WE HAVE TO FIND INPUT CONNECTIONS ANYWAY
+    """
     if len(filtered_modules) == 0:
         target_module = module(inpulse.destination, "STUB", [])
     else:
         target_module = filtered_modules[0]
+    """
 
     #handle flip flops
     if target_module.type == '%':
@@ -114,10 +119,33 @@ for m in module_rows_raw:
         new_module.flipflop_currentstate = ""
     modules.add(new_module)
 
+#Find all input connections
+stub_mod_created = False
+stub_module = module("","",[])
+for m in modules:
+    for oc in m.output_connections:
+        target_filter = list(filter(lambda x: x.name==oc,modules))
+        if len(target_filter) == 0:
+           stub_mod = module(oc, "STUB", [])
+           stub_mod.input_connections.append(m.name)
+           stub_mod_created = True
+        else:
+            target = target_filter[0]
+            if oc not in target.input_connections:
+                target.input_connections.append(m.name)
+
+if stub_mod_created == True: modules.add(stub_mod)
+
+#TODO - Need to populate conj last seen for all conj module snow that we have inputs and outputs
+for m in modules:
+    if m.type == '&':
+        for ic in m.input_connections:
+            m.conj_lastseen.append([ic,'L'])
+
 cycle_count = 0
 high_count = 0
 low_count = 0
-#Might need to traverse and find all input connections too
+
 
 for cycle_count in range(1000):
     pulses_to_process = [] #Starting with list as might have duplicates and need ordering
