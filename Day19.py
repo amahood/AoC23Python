@@ -283,9 +283,6 @@ for p in paths_from_inpoint:
     print(labels)
     print(path)
 
-    #Start attempt at calculation here
-    #CANT ASSUME IT"S ONLY THE LAST THAT IS OPPOSITE< NEED TO TRACK ALONG THE WAY
-    # MAYBE HAVE PATHS RIGH TNOW< BUT NEED TO UPDATE THE RANG CALC FUNCTIONS TO UYSE TRUE/FALSE
     output_ranges = process_path_for_ranges(p)
     
     length = ""
