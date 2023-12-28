@@ -112,8 +112,9 @@ high_count = 0
 low_count = 0
 #Might need to traverse and find all input connections too
 
-pulses_to_process = [] #Starting with list as might have duplicates and need ordering
 for cycle_count in range(1000):
+    pulses_to_process = [] #Starting with list as might have duplicates and need ordering
+    print("cycle - " + str(cycle_count))
     #increment low count by one because we always count button push
     low_count += 1
     #fire pulse at broadcast
