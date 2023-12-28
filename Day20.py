@@ -16,7 +16,14 @@ def process_pulse(inpulse, modules):
     output_pulses = []
 
     #find module for the pulse
-    target_module = list(filter(lambda x: x.name == inpulse.destination, modules))[0]
+    filtered_modules = list(filter(lambda x: x.name == inpulse.destination, modules)) 
+    
+    #If there isn't actually a module in the set, liek the test output node in second sample, make a stub node
+    if len(filtered_modules) == 0:
+        target_module = module(inpulse.destination, "STUB", [])
+    else:
+        target_module = filtered_modules[0]
+
     #handle flip flops
     if target_module.type == '%':
         """
@@ -68,8 +75,8 @@ def process_pulse(inpulse, modules):
 
     return output_pulses
 
-f = open("Day20Test1.txt")
-#f = open("Day20Test2.text")
+#f = open("Day20Test1.txt")
+f = open("Day20Test2.txt")
 #f = open("Day20.txt")
 
 module_rows_raw = set()
