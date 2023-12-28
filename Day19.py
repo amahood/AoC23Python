@@ -97,8 +97,8 @@ def find_workflow(label, workflow_set):
         print("ERROR")
         
 
-f = open("Day19TestInput.txt")
-#f = open("Day19Input.txt")
+#f = open("Day19TestInput.txt")
+f = open("Day19Input.txt")
 
 #read in workflow lines
 raw_workflows = []
