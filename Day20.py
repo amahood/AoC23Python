@@ -81,8 +81,8 @@ def process_pulse(inpulse, modules):
     return output_pulses
 
 #f = open("Day20Test1.txt")
-f = open("Day20Test2.txt")
-#f = open("Day20.txt")
+#f = open("Day20Test2.txt")
+f = open("Day20Input.txt")
 
 module_rows_raw = set()
 for l in f:
@@ -175,3 +175,4 @@ for cycle_count in range(1000):
 
 print("High pulses - " + str(high_count))
 print("Low pulses  - " + str(low_count))
+print("Factor - " + str(low_count*high_count))
