@@ -82,9 +82,15 @@ def find_supports(pts_below, brickset):
             # Can further optimize by only looking at bricks that are below, not all bricks
             if p in b.occupiedpts:
                 supports.append(b)
+    
+    if len(supports) == 0:
+        print("DEBUG ERROR, SHOULDN:T HAVE NO SUPPORTS")
+        if p in all_occupied_pts:
+            print("MISMATCH")
     return supports
 
-f = open("Day22TestInput.txt")
+#f = open("Day22TestInput.txt")
+f = open("Day22Input.txt")
 
 raw_bricks = []
 
@@ -129,10 +135,18 @@ Approach to collapsing:
 for plane in range(2,highest_low_z+1):
     bricks_in_plane = list(filter(lambda x: x.lowest_z == plane, raw_bricks))
     for b in bricks_in_plane:
+        print("Falling brick - " + str(b.id))
+        fall_plane = plane
         at_low = False
-        while at_low == False:
+        while at_low == False and fall_plane >1:
+            points_on_plane = []
             #find points on z_plane
-            points_on_plane = list(filter(lambda x: x[2]==plane, b.occupiedpts))
+            if b.orientation != 'Z':
+                points_on_plane = list(filter(lambda x: x[2]==fall_plane, b.occupiedpts))
+            elif b.orientation == 'Z':
+                if b.lowest_z == fall_plane:
+                    points_on_plane.append((b.occupiedpts[0][0], b.occupiedpts[0][1], b.lowest_z))
+            
             
             #s  ee if all below pts on that plane are occupied
             if len(points_on_plane) != 0:
@@ -154,7 +168,11 @@ for plane in range(2,highest_low_z+1):
                     b.falldown() #This updates object pts itself
                     for p in b.occupiedpts:
                         all_occupied_pts.add(p)
-            plane = plane - 1
+            fall_plane = fall_plane - 1
+
+for b in raw_bricks:
+    if b.lowest_z == 0:
+        print("SHOULDNT: HAVE ANY")
 
 """
 Temp work to build the visualization grids on the page to compare
@@ -212,19 +230,24 @@ for b in raw_bricks:
         for op in b.occupiedpts:
             pts_below.append((op[0],op[1],op[2]-1))
     elif b.orientation == 'Z':
-        pts_below.append((op[0], op[1], b.lowest_z-1))
+        pts_below.append((b.occupiedpts[0][0], b.occupiedpts[0][1], b.lowest_z-1))
     
-    #BUG - DON'T PROPERLY HANDLE Z BRICKS, BECAUSE I LOOK AT EACH POINT, IT THINKS IT's SUPPORTING ITSELF
     if pts_below[0][2] != 0:
         blocks_supporting = find_supports(pts_below, raw_bricks)
+        if len(blocks_supporting) == 0:
+            print("ERROR, SHOULDN'T NOT BE SUPPORTED BY ANYTHING")
         for bs in blocks_supporting:
-                b.supportingbricks.append(bs.id)
+            b.supportingbricks.append(bs.id)
+    print("Brick - " + str(b.id) + " - # of Supports - " + str(len(b.supportingbricks)))
 
 bricks_cant_remove = set()
 for b in raw_bricks:
-    print("Brick - " + str(b.id) + " - # of Supports - " + str(len(b.supportingbricks)))
+    
+    if len(b.supportingbricks) == 0:
+        if b.lowest_z !=1:
+            print("ERRORRRRRRRR")
     if len(b.supportingbricks) == 1:
-        bricks_cant_remove.add(b.supportingbricks[0])
+        bricks_cant_remove.append(b.supportingbricks[0])
 
 num_bricks_to_remove = len(raw_bricks) - len(bricks_cant_remove)
 
