@@ -146,10 +146,12 @@ cycle_count = 0
 high_count = 0
 low_count = 0
 
-
-for cycle_count in range(1000):
+turned_on_rx = False
+cycle_count = 1
+#for cycle_count in range(1000):
+while turned_on_rx == False:
     pulses_to_process = [] #Starting with list as might have duplicates and need ordering
-    print("cycle - " + str(cycle_count))
+    print("Cycle - " + str(cycle_count))
     #increment low count by one because we always count button push
     low_count += 1
     #fire pulse at broadcast
@@ -171,8 +173,16 @@ for cycle_count in range(1000):
         #merge lists
         pulses_to_process = pulses_to_process + pulses_to_add
         pulse_iterations += 1
+    
+    #Part 2 - Count Pulses to rx
+    pulses_to_rx = list(filter(lambda x: (x.destination == "rx" and x.level == 'L'), pulses_to_process))
+    if len(pulses_to_rx) == 1:
+        turned_on_rx = True
+    print(" Low Pulses to Rx - " + str(len(pulses_to_rx)))
+    cycle_count +=1
 
-
+"""
 print("High pulses - " + str(high_count))
 print("Low pulses  - " + str(low_count))
 print("Factor - " + str(low_count*high_count))
+"""
