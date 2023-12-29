@@ -22,10 +22,10 @@ def is_in_rockset(location):
             is_rock = True
     return is_rock
 
-f = open("Day21TestInput.txt")
-#f = open("Day21Input.txt")
+#f = open("Day21TestInput.txt")
+f = open("Day21Input.txt")
 
-STEPS = 6
+STEPS = 64
 
 input_lines = []
 for l in f:
@@ -66,6 +66,7 @@ while still_walking == True:
     for f in frontier.queue:
         if f[0] <= STEPS:
             still_walking = True
+            break
 
 patch_counter = 0
 for v in visited_set:
