@@ -13,17 +13,17 @@ class Brick():
         length = 0
         if startpt == endpt:
             length = 1
+        else:
+            xdelta = abs(endpt[0]-startpt[0])
+            ydelta = abs(endpt[1]-startpt[1])
+            zdelta = abs(endpt[2]-startpt[2])
 
-        xdelta = abs(endpt[0]-startpt[0])
-        ydelta = abs(endpt[1]-startpt[1])
-        zdelta = abs(endpt[2]-startpt[2])
-
-        if xdelta == 0 and ydelta == 0:
-            length = zdelta+1
-        elif xdelta == 0 and zdelta == 0:
-            length = ydelta+1
-        elif ydelta == 0 and zdelta == 0:
-            length = xdelta + 1
+            if xdelta == 0 and ydelta == 0:
+                length = zdelta+1
+            elif xdelta == 0 and zdelta == 0:
+                length = ydelta+1
+            elif ydelta == 0 and zdelta == 0:
+                length = xdelta + 1
         return length
     
     def calc_orientation(self, startpt, endpt):
@@ -31,34 +31,37 @@ class Brick():
         Orientation is the direction of change, e.g. extends in orientation direction. S if just one block.
         """
         if startpt == endpt:
-            orientation = 'S'
-
-        orientation = ''
-        xdelta = abs(endpt[0]-startpt[0])
-        ydelta = abs(endpt[1]-startpt[1])
-        zdelta = abs(endpt[2]-startpt[2])
-
-        if xdelta == 0 and ydelta == 0:
             orientation = 'Z'
-        elif xdelta == 0 and zdelta == 0:
-            orientation = 'Y'
-        elif ydelta == 0 and zdelta == 0:
-            orientation = 'X'
+        else:
+            orientation = ''
+            xdelta = abs(endpt[0]-startpt[0])
+            ydelta = abs(endpt[1]-startpt[1])
+            zdelta = abs(endpt[2]-startpt[2])
+
+            if xdelta == 0 and ydelta == 0:
+                orientation = 'Z'
+            elif xdelta == 0 and zdelta == 0:
+                orientation = 'Y'
+            elif ydelta == 0 and zdelta == 0:
+                orientation = 'X'
         return orientation
     
     def calc_occupied_points(self):
         occupied_pts = []
 
         if self.orientation == 'Z':
-            for z in range(self.startpt[2], self.endpt[2]+1):
-                occupied_pts.append((self.startpt[0], self.endpt[1], z))
+            #for z in range(self.startpt[2], self.endpt[2]+1):
+            for z in range( min(self.startpt[2], self.endpt[2]), max(self.startpt[2], self.endpt[2])+1):
+                occupied_pts.append((self.startpt[0], self.startpt[1], z))
 
         if self.orientation == 'X':
-            for x in range(self.startpt[0], self.endpt[0]+1):
+            #for x in range(self.startpt[0], self.endpt[0]+1):
+            for x in range( min(self.startpt[0], self.endpt[0]), max(self.startpt[0], self.endpt[0])+1):
                 occupied_pts.append((x, self.startpt[1], self.startpt[2]))
         
         if self.orientation == 'Y':
-            for y in range(self.startpt[1], self.endpt[1]+1):
+            #for y in range(self.startpt[1], self.endpt[1]+1):
+            for y in range( min(self.startpt[1], self.endpt[1]), max(self.startpt[1], self.endpt[1])+1):
                 occupied_pts.append((self.startpt[0], y, self.startpt[2]))
         
         return occupied_pts
@@ -76,12 +79,12 @@ class Brick():
         return
 
 def find_supports(pts_below, brickset):
-    supports = []
+    supports = set()
     for p in pts_below:
         for b in brickset:
             # Can further optimize by only looking at bricks that are below, not all bricks
             if p in b.occupiedpts:
-                supports.append(b)
+                supports.add(b)
     
     if len(supports) == 0:
         print("DEBUG ERROR, SHOULDN:T HAVE NO SUPPORTS")
@@ -91,6 +94,7 @@ def find_supports(pts_below, brickset):
 
 #f = open("Day22TestInput.txt")
 f = open("Day22Input.txt")
+#f = open("Day22Test2.txt")
 
 raw_bricks = []
 
@@ -161,12 +165,13 @@ for plane in range(2,highest_low_z+1):
                 if all_pts_below_unoccupied == True:
                     #Need to update global set of all occipied pts
                     for p in b.occupiedpts:
-                        if p in all_occupied_pts:
-                            all_occupied_pts.remove(p)
+                        all_occupied_pts.remove(p)
 
                     #Shift down all pts on plane - need to update actual object and the all occupied pts set
                     b.falldown() #This updates object pts itself
                     for p in b.occupiedpts:
+                        if p in all_occupied_pts:
+                            print("ERror this should not be the case")
                         all_occupied_pts.add(p)
             fall_plane = fall_plane - 1
 
@@ -241,13 +246,12 @@ for b in raw_bricks:
     print("Brick - " + str(b.id) + " - # of Supports - " + str(len(b.supportingbricks)))
 
 bricks_cant_remove = set()
-for b in raw_bricks:
-    
+for b in raw_bricks:  
     if len(b.supportingbricks) == 0:
         if b.lowest_z !=1:
             print("ERRORRRRRRRR")
     if len(b.supportingbricks) == 1:
-        bricks_cant_remove.append(b.supportingbricks[0])
+        bricks_cant_remove.add(b.supportingbricks[0])
 
 num_bricks_to_remove = len(raw_bricks) - len(bricks_cant_remove)
 
