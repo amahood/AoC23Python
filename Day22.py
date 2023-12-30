@@ -95,8 +95,8 @@ def find_supports(pts_below, brickset):
             print("MISMATCH")
     return supports
 
-f = open("Day22TestInput.txt")
-#f = open("Day22Input.txt")
+#f = open("Day22TestInput.txt")
+f = open("Day22Input.txt")
 #f = open("Day22Test2.txt")
 
 raw_bricks = []
@@ -142,7 +142,7 @@ Approach to collapsing:
 for plane in range(2,highest_low_z+1):
     bricks_in_plane = list(filter(lambda x: x.lowest_z == plane, raw_bricks))
     for b in bricks_in_plane:
-        print("Falling brick - " + str(b.id))
+        #print("Falling brick - " + str(b.id))
         fall_plane = plane
         at_low = False
         while at_low == False and fall_plane >1:
@@ -246,7 +246,7 @@ for b in raw_bricks:
             print("ERROR, SHOULDN'T NOT BE SUPPORTED BY ANYTHING")
         for bs in blocks_supporting:
             b.supportingbricks.append(bs.id)
-    print("Brick - " + str(b.id) + " - # of Supports - " + str(len(b.supportingbricks)))
+    #print("Brick - " + str(b.id) + " - # of Supports - " + str(len(b.supportingbricks)))
 
 bricks_cant_remove = set()
 for b in raw_bricks:  
@@ -260,50 +260,6 @@ num_bricks_to_remove = len(raw_bricks) - len(bricks_cant_remove)
 
 print("Bricks can remove - " + str(num_bricks_to_remove))
 
-def find_number_supported_bricks(target_brick):
-    supported_bricks = 0
-
-    #for bricks I'm supporting, call function 
-    if len(target_brick.bricks_supported) != 0:
-        for sb in target_brick.bricks_supported:
-            #find full brick
-            next_brick = list(filter(lambda x: x.id == sb, raw_bricks))[0]
-            if len(next_brick.supportingbricks) == 1: #Only go down the path if there is only one brick holding it up, but this isn't working
-                local_chain_result = find_number_supported_bricks(next_brick)
-                supported_bricks = supported_bricks + local_chain_result 
-
-    #base case - no bricks supported
-    elif len(target_brick.bricks_supported) == 0:
-        supported_bricks = 1
-    
-    print("Incoming brick - " + str(target_brick.id) + " - Number of bricks in chain - " + str(supported_bricks))
-    return supported_bricks
-
-#Working on Part 2
-"""
-Overall approach to PArt 2
-- Take a pass and flip to find bricks each brick supports (add a member to the class) - SHOULD BE DONE
-- Build recursive function that is finding number of bricks supported in chain  
-    - LOGIC IS BROKEN HERE, NEEDTO RETHINK
-        - Maybe try seeing how many bricks would fall down if we removed these as occupied pts
-- ADd result to running sum and call function
-"""
-
-""""
-This approach didn't work to Part 2 because bricks won't be counted as falling if they ahve more than one support even though they would.
-
-total_chain_reaction = 0
-print("Part 2 - Reversing List to Find Bricks Each Brick Supports")
-for b in raw_bricks:
-    for rb in raw_bricks:
-        if b.id in rb.supportingbricks:
-            b.bricks_supported.add(rb.id)
-    print("Brick - " + str(b.id) + " - # of Bricks Supported - " + str(len(b.bricks_supported)))
-
-for b in raw_bricks:
-    local_chain_reaction = find_number_supported_bricks(b)
-    total_chain_reaction = total_chain_reaction + local_chain_reaction
-"""
 def collapse_and_count(plane_to_start, local_raw_bricks, local_all_occupied_pts):
     bricks_moved_downward = 0
     bricks_moved_down = set()
@@ -364,10 +320,9 @@ for b in raw_bricks:
     raw_bricks_copy.remove(to_remove)
     for op in b.occupiedpts:
         all_occupied_pts_copy.remove(op)
-    print("TEsting collapse for brick - " + str(b.id))
-    #BUG AT 5 in SAMPLE MAY NEED TO PASS IN PLANE + 1, doesn't work for first brick though, need to look at how function is setup
+    #print("Pt. 2 Testing collapse for brick - " + str(b.id))
     local_reaction = collapse_and_count(b.lowest_z+1, raw_bricks_copy, all_occupied_pts_copy)
-    print("Collapse count - " + str(local_reaction))
+    #print("Collapse count - " + str(local_reaction))
     total_chain_reaction = total_chain_reaction + local_reaction
 
 
