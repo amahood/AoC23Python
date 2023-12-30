@@ -1,3 +1,5 @@
+import copy
+
 class Brick():
     def __init__(self, id, startpt, endpt):
         self.id = id
@@ -268,8 +270,7 @@ def find_number_supported_bricks(target_brick):
             next_brick = list(filter(lambda x: x.id == sb, raw_bricks))[0]
             if len(next_brick.supportingbricks) == 1: #Only go down the path if there is only one brick holding it up, but this isn't working
                 local_chain_result = find_number_supported_bricks(next_brick)
-                supported_bricks = supported_bricks + local_chain_result
-            else 
+                supported_bricks = supported_bricks + local_chain_result 
 
     #base case - no bricks supported
     elif len(target_brick.bricks_supported) == 0:
@@ -284,8 +285,12 @@ Overall approach to PArt 2
 - Take a pass and flip to find bricks each brick supports (add a member to the class) - SHOULD BE DONE
 - Build recursive function that is finding number of bricks supported in chain  
     - LOGIC IS BROKEN HERE, NEEDTO RETHINK
+        - Maybe try seeing how many bricks would fall down if we removed these as occupied pts
 - ADd result to running sum and call function
 """
+
+""""
+This approach didn't work to Part 2 because bricks won't be counted as falling if they ahve more than one support even though they would.
 
 total_chain_reaction = 0
 print("Part 2 - Reversing List to Find Bricks Each Brick Supports")
@@ -298,5 +303,72 @@ for b in raw_bricks:
 for b in raw_bricks:
     local_chain_reaction = find_number_supported_bricks(b)
     total_chain_reaction = total_chain_reaction + local_chain_reaction
+"""
+def collapse_and_count(plane_to_start, local_raw_bricks, local_all_occupied_pts):
+    bricks_moved_downward = 0
+    bricks_moved_down = set()
+    for plane in range(plane_to_start,highest_low_z+1):
+        bricks_in_plane = list(filter(lambda x: x.lowest_z == plane, local_raw_bricks))
+
+        for b in bricks_in_plane:
+            fall_plane = plane
+            at_low = False
+            while at_low == False and fall_plane >1:
+                points_on_plane = []
+                #find points on z_plane
+                if b.orientation != 'Z':
+                    points_on_plane = list(filter(lambda x: x[2]==fall_plane, b.occupiedpts))
+                elif b.orientation == 'Z':
+                    if b.lowest_z == fall_plane:
+                        points_on_plane.append((b.occupiedpts[0][0], b.occupiedpts[0][1], b.lowest_z))
+                
+                
+                #s  ee if all below pts on that plane are occupied
+                if len(points_on_plane) != 0:
+                    all_pts_below_unoccupied = True
+                    for pp in points_on_plane:
+                        pt_below = (pp[0], pp[1], pp[2]-1)
+                        if pt_below[2] == 0 or pt_below in local_all_occupied_pts:
+                            all_pts_below_unoccupied = False
+                            at_low = True
+                            break
+                    
+                    if all_pts_below_unoccupied == True:
+                        bricks_moved_down.add(b.id)
+                        #Need to update global set of all occipied pts
+                        for p in b.occupiedpts:
+                            local_all_occupied_pts.remove(p)
+
+                        #Shift down all pts on plane - need to update actual object and the all occupied pts set
+                        b.falldown() #This updates object pts itself
+                        for p in b.occupiedpts:
+                            if p in local_all_occupied_pts:
+                                print("ERror this should not be the case")
+                            local_all_occupied_pts.add(p)
+                fall_plane = fall_plane - 1
+
+    return len(bricks_moved_down)
+
+"""
+Updated approach - 
+- for each brick, make deep copy of occupied pts, make deep copy of raw bricks
+    - remove this brick's pts from occupied pts
+    - encapsulate all of the collapsing part of part 1 into a function that returns how many bricks went downard (conts not num spaces) 
+    - add that number to the sum
+"""
+total_chain_reaction = 0
+for b in raw_bricks:
+    raw_bricks_copy = copy.deepcopy(raw_bricks)
+    all_occupied_pts_copy = copy.deepcopy(all_occupied_pts)
+    to_remove = list(filter(lambda x: x.id==b.id, raw_bricks_copy))[0]
+    raw_bricks_copy.remove(to_remove)
+    for op in b.occupiedpts:
+        all_occupied_pts_copy.remove(op)
+    print("TEsting collapse for brick - " + str(b.id))
+    #BUG AT 5 in SAMPLE MAY NEED TO PASS IN PLANE + 1, doesn't work for first brick though, need to look at how function is setup
+    local_reaction = collapse_and_count(b.lowest_z+1, raw_bricks_copy, all_occupied_pts_copy)
+    print("Collapse count - " + str(local_reaction))
+    total_chain_reaction = total_chain_reaction + local_reaction
+
 
 print("Total chain reaction sum - " + str(total_chain_reaction))
