@@ -11,6 +11,7 @@ class path:
     def __init__(self, point, current_length):
         self.latest_location = point
         self.path_length = current_length
+        self.visited_points = set()
 
 class xy_point:
     def __init__(self, x, y, dir):
@@ -74,17 +75,23 @@ def find_potential_next_steps(current_point):
     if len(potential_next_steps) == 0:
         print("Returning no locations, end ofthe LINE BICHES")
 
-    for pns in potential_next_steps:
-        temp_compare = copy.deepcopy(pns)
-        temp_compare.traveldir = ''
-        if temp_compare in visited_points:
-            potential_next_steps.remove(pns)
-
     return potential_next_steps
 
+"""
+#BUG - THIS CANT BE WORKING BECAUSE I TOUCH MORE STEPS THAN THERE ARE IN THE GRID WHEN I KEEP IT RUNNING - SET COMPARE IS BROKEN
+    potential_next_steps_not_visited = set()
+    for pns in potential_next_steps:
+        temp_result = list(filter(lambda x: x.x == pns.x and x.y == pns.y, visited_points)) #MORE DEBUGGING
+        if len(temp_result) == 0: #Change this to only add ones not visited
+            potential_next_steps_not_visited.add(pns)
+            #print("ERROR")
+            #potential_next_steps.remove(pns) #GETTING RUNTIME ERROR HERE BECAUSE I"M CHANGING SET SIZE WHEN REMOVING, MAYBE COPY?
 
-#f = open("Day23TestInput.txt")
-f = open("Day23Input.txt")
+    return potential_next_steps_not_visited
+"""
+
+f = open("Day23TestInput.txt")
+#f = open("Day23Input.txt")
 
 hiking_map = []
 for l in f:
@@ -114,9 +121,6 @@ ending_pt = list(filter(lambda x: x.x == ending_x and x.y == ending_y, hiking_ma
 successful_path_lengths = []
 potential_paths = [] #Making this a list as we are going to need to be updating this
 
-visited_points = set()
-visited_points.add(xy_point(starting_x, starting_y, 'S'))
-
 """
 Overall approach thoughts for algo:
 - Build list of potential paths - DONE
@@ -129,60 +133,69 @@ Overall approach thoughts for algo:
 
 """
 initial_path = path(starting_pt, 0)
+initial_path.visited_points.add(xy_point(starting_x, starting_y, ''))
 potential_paths.append(initial_path)
+
+#OVERALL NEED TO RESTRUCTURE THE LOGIC HERE - WE NEED TO KEEP TRACK OF VISITED POINTS FOR A PATH NOT GLOBALLY BECAUSE IT IS FOR A PATH
+# Consider updating the logic to be follow a path to teh end and spawn paths, but then pick off a new path
+"""
+Pseudocode for update approach:
+- Update path with visited set
+- Pick off potential path
+    - follow until end spawning paths along the way
+    - Once at the end remove and pick new path
+"""
 
 while len(potential_paths) > 0:
     #print("Number of potential paths exploring - " + str(len(potential_paths)))
-    for pp in potential_paths:
+    
+    pp = potential_paths[0]
+    end_of_current_path = False
+    while end_of_current_path == False:
 
         #First try to handle end here
         if pp.latest_location.x == ending_x and pp.latest_location.y == ending_y:
-            print("Found a path to the end with steps - " + str(pp.path_length))
+            #print("Found a path to the end with steps - " + str(pp.path_length))
             successful_path_lengths.append(pp.path_length)
             potential_paths.remove(pp)
-            break
+            end_of_current_path = True
 
-        potential_next_steps = find_potential_next_steps(pp.latest_location)
-        potential_step_counter = 1
-
-        #BUG - NEED TO CONSIDER MOVING VISITED SET COMPARISON TO NEIGHBOR FUNCTION? OTHERWISE WE ARE EVER GOING TO BE REMOVING PATHS
-        #if len is 0, need to discard path, we have hit the end of the road with no viable candidates
-        if len(potential_next_steps) == 0:
-            print("Discarding path at - " + str(pp.latest_location.x)+"," + str(pp.latest_location.y))
-            potential_paths.remove(pp)
-        
-        if len(potential_next_steps) >= 1: 
-            while len(potential_next_steps) > 0:
-                # Cretae a map point that represents the next location, including point, char, and direction of travel
-                next_step = potential_next_steps.pop()
-                next_step_for_comparison = copy.deepcopy(next_step)
-                next_step_for_comparison.traveldir = ''
-                
-                if next_step_for_comparison not in visited_points:
-                    visited_points.add(next_step_for_comparison)
+        if end_of_current_path == False:                
+            potential_next_steps = find_potential_next_steps(pp.latest_location)
+            potential_step_counter = 1
+            
+            if len(potential_next_steps) >= 1: 
+                while len(potential_next_steps) > 0:
+                    # Cretae a map point that represents the next location, including point, char, and direction of travel
+                    next_step = potential_next_steps.pop()
+                    next_step_for_comparison = copy.deepcopy(next_step)
+                    next_step_for_comparison.traveldir = ''
                     
-                    #Populate the point with the data
-                    next_step_on_path = map_point(next_step.x, next_step.y, '')
-                    char = (list(filter(lambda x: x.x == next_step.x and x.y == next_step.y, hiking_map_set))[0]).mapchar
-                    next_step_on_path.mapchar = char
-                    next_step_on_path.direction_of_travel = next_step.traveldir
-                    
-                    #Update the current path if this is the first one we are testing - Update path with this point and increment length
-                    if potential_step_counter == 1:
-                        pp.latest_location = next_step_on_path
-                        pp.path_length = pp.path_length + 1
-                    #If there is more than one point returned, we won't just update current one, we spawn a new path
-                    elif potential_step_counter > 1:
-                        print("New path branching at decision point - " + str(pp.latest_location.x) + "," + str(pp.latest_location.y))
-                        new_path_copy = copy.deepcopy(pp)
-                        new_path_copy.latest_location = next_step_on_path
-                        new_path_copy.path_length = new_path_copy.path_length
-                        potential_paths.append(new_path_copy)
-                else:
-                    print("Next step is in visited set, this path is a dead end - nothing to remove, we are just not doing anythingiwth this next point")    
-                potential_step_counter +=1 
+                    if next_step_for_comparison not in pp.visited_points:
+                        pp.visited_points.add(next_step_for_comparison)
+                        
+                        #Populate the point with the data
+                        next_step_on_path = map_point(next_step.x, next_step.y, '')
+                        char = (list(filter(lambda x: x.x == next_step.x and x.y == next_step.y, hiking_map_set))[0]).mapchar
+                        next_step_on_path.mapchar = char
+                        next_step_on_path.direction_of_travel = next_step.traveldir
+                        
+                        #Update the current path if this is the first one we are testing - Update path with this point and increment length
+                        if potential_step_counter == 1:
+                            pp.latest_location = next_step_on_path #Note to self, already updating the ncurrent paths latest location and length to the first result even though we clone later
+                            pp.path_length = pp.path_length + 1
+                        #If there is more than one point returned, we won't just update current one, we spawn a new path
+                        
+                        elif potential_step_counter > 1:
+                            #print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
+                            new_path_copy = copy.deepcopy(pp)
+                            new_path_copy.latest_location = next_step_on_path #Note - This overrides the fishy behavior above of updating fcurrentpath before copying, as we're basiclly getting it for it's length
+                            new_path_copy.path_length = new_path_copy.path_length
+                            potential_paths.append(new_path_copy)
+                    else:
+                        print("Next step is in visited set, this path is a dead end - nothing to remove, we are just not doing anythingiwth this next point")    
+                    potential_step_counter +=1 
                 
-
 for l in successful_path_lengths:
     print(str(l) + " ")
 print("Longest - " + str(max(successful_path_lengths)))
