@@ -152,7 +152,7 @@ while len(potential_paths) > 0:
                         #If there is more than one point returned, we won't just update current one, we spawn a new path
                         
                         elif potential_step_counter > 1:
-                            print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
+                            #print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
                             new_path_copy = copy.deepcopy(pp)
                             new_path_copy.latest_location = next_step_on_path #Note - This overrides the fishy behavior above of updating fcurrentpath before copying, as we're basiclly getting it for it's length
                             new_path_copy.path_length = new_path_copy.path_length
@@ -160,7 +160,4 @@ while len(potential_paths) > 0:
                     else:
                         print("Next step is in visited set, this path is a dead end - nothing to remove, we are just not doing anythingiwth this next point")    
                     potential_step_counter +=1 
-                
-for l in successful_path_lengths:
-    print(str(l) + " ")
 print("Longest - " + str(max(successful_path_lengths)))
