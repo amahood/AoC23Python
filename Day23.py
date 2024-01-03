@@ -1,5 +1,21 @@
 import copy
 
+class node:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        #self.incoming_nodes = set()
+        self.neighbors = set()
+
+class edge:
+    def __init__(self, start_x, start_y, dir_from_start):
+        self.start_x = start_x
+        self.start_y = start_y
+        self.end_x = 0
+        self.end_y = 0
+        self.length = 0
+        self.dir_from_start = dir_from_start
+
 class map_point:
     def __init__(self, x,y, mapchar):
         self.x = x
@@ -8,8 +24,9 @@ class map_point:
         self.direction_of_travel = ''
 
 class path:
-    def __init__(self, point, current_length):
-        self.latest_location = point
+    def __init__(self, latest_x, latest_y, current_length):
+        self.latest_x = latest_x
+        self.latest_y = latest_y
         self.path_length = current_length
         self.visited_points = set()
 
@@ -17,12 +34,16 @@ class xy_point:
     def __init__(self, x, y, dir):
         self.x = x
         self.y = y
-        self.traveldir = dir
+        self.direction_of_travel = dir
+
+class xy_point2:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 def find_potential_next_steps(current_point):
     #Pass in a Map_Point, not just XY Point (NEed a mapchar)
     potential_next_steps = set()
-    current_char = current_point.mapchar
 
     down = (list(filter(lambda x: x.x == current_point.x+1 and x.y == current_point.y, hiking_map_set))[0]).mapchar
     if current_point.x > 0:
@@ -30,6 +51,8 @@ def find_potential_next_steps(current_point):
     left = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y-1, hiking_map_set))[0].mapchar
     right = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y+1, hiking_map_set))[0].mapchar
     
+    #Part 2 - Remove the Ice Logic
+    """
     #Handle the icy patches first to make sure we go there
     #Assumption that we are not getting iced off a cliff so not doing bounds checking here
     if current_char == '^':
@@ -40,45 +63,65 @@ def find_potential_next_steps(current_point):
         potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
     elif current_char == '>':
         potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))
+    """
     
     #Now handle normal non icy conditions. Checked input, assume we don't need to do bounds checking just # checking
-    else:
-        if current_point.direction_of_travel == 'D' or current_point.direction_of_travel == 'S': #means no up option
-            if down != '#' and down != '^':
-                potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
-            if left != '#' and left != '>':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
-            if right != '#' and right != '<':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))        
-        elif current_point.direction_of_travel == 'U': #means no down option
-            if left != '#' and left != '>':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
-            if right != '#' and right != '<':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))
-            if up != '#' and up != 'v':
-                potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
-        elif current_point.direction_of_travel == 'L': #means no right option
-            if up != '#' and up != 'v':
-                potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
-            if down != '#' and down != '^':
-                potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
-            if left != '#' and left != '>':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
-        elif current_point.direction_of_travel == 'R': #means no left option
-            if down != '#' and down != '^':
-                potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
-            if right != '#'  and right != '<':
-                potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))
-            if up != '#'  and up != 'v':
-                potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
+    #else:
+    if current_point.direction_of_travel == 'D' or current_point.direction_of_travel == 'S': #means no up option
+        if down != '#':
+            potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
+        if left != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
+        if right != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))        
+    elif current_point.direction_of_travel == 'U' and current_point.x > 0: #means no down option
+        if left != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
+        if right != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))
+        if up != '#':
+            potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
+    elif current_point.direction_of_travel == 'L': #means no right option
+        if up != '#':
+            potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
+        if down != '#':
+            potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
+        if left != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y-1, 'L'))
+    elif current_point.direction_of_travel == 'R': #means no left option
+        if down != '#':
+            potential_next_steps.add(xy_point(current_point.x + 1, current_point.y, 'D'))
+        if right != '#':
+            potential_next_steps.add(xy_point(current_point.x, current_point.y +1, 'R'))
+        if up != '#':
+            potential_next_steps.add(xy_point(current_point.x - 1, current_point.y, 'U'))
 
     if len(potential_next_steps) == 0:
         print("Returning no locations, end ofthe LINE BICHES")
 
     return potential_next_steps
 
-#f = open("Day23TestInput.txt")
-f = open("Day23Input.txt")
+def is_junction(current_point):
+    is_junction = False
+    
+    down = (list(filter(lambda x: x.x == current_point.x+1 and x.y == current_point.y, hiking_map_set))[0]).mapchar
+    up = list(filter(lambda x: x.x == current_point.x-1 and x.y == current_point.y, hiking_map_set))[0].mapchar
+    left = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y-1, hiking_map_set))[0].mapchar
+    right = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y+1, hiking_map_set))[0].mapchar
+
+    if down != '#' and up != '#' and left != '#':
+        is_junction = True
+    elif down != '#' and up != '#' and right != '#':
+        is_junction = True
+    elif down != '#' and left != '#' and right != '#':
+        is_junction = True
+    elif up != '#' and left != '#' and right != '#':
+        is_junction = True
+
+    return is_junction
+
+f = open("Day23TestInput.txt")
+#f = open("Day23Input.txt")
 
 hiking_map = []
 for l in f:
@@ -105,59 +148,158 @@ starting_pt = list(filter(lambda x: x.x == starting_x and x.y == starting_y, hik
 starting_pt.direction_of_travel = 'S'
 ending_pt = list(filter(lambda x: x.x == ending_x and x.y == ending_y, hiking_map_set))[0]
 
-successful_path_lengths = []
-potential_paths = [] #Making this a list as we are going to need to be updating this
 
-initial_path = path(starting_pt, 0)
-initial_path.visited_points.add(xy_point(starting_x, starting_y, ''))
+#PART 2 WORKING TO BUILD THE MAP
+"""
+Approach - Do it in two passes.
+- First pass - Find the nodes, and find the edges with starting node and ending node
+- Second pass - Go through and add the end nodes and lengths to each node
+
+"""
+node_set = set()
+node_set.add((starting_x, starting_y))
+node_set.add((ending_x, ending_y))
+
+# Edge has startx/y, endx/y, length, dir from start
+initial_edge = edge(starting_x, starting_y, 'D')
+
+potential_edges = set()
+potential_edges.add(initial_edge)
+
+known_edges = set()
+
+visited_set = set()
+visited_set.add((starting_x, starting_y))
+
+while len(potential_edges) > 0:
+
+    print("Number of potential edges to close - " + str(len(potential_edges))) 
+    pe = potential_edges.pop()    
+    current_location = xy_point(pe.start_x, pe.start_y, pe.dir_from_start)
+    
+    if pe.dir_from_start == 'D':
+        current_location.x += 1
+    elif pe.dir_from_start == 'U':
+        current_location.x -= 1
+    elif pe.dir_from_start == 'L':
+        current_location.y -= 1
+    elif pe.dir_from_start == 'R':
+        current_location.y += 1
+
+    closed_current_edge = False
+
+    while closed_current_edge == False:
+        
+        #Handle the end first
+        if current_location.x == ending_x and current_location.y == ending_y:
+            #Close current edge
+            closed_current_edge = True
+            pe.end_x = current_location.x
+            pe.end_y = current_location.y
+            pe.length += 1
+            known_edges.add(pe)
+
+        else:  
+            potential_next_steps = find_potential_next_steps(current_location)
+            #If it's only one step, we can just update location, update, length, and go again
+            if len(potential_next_steps) == 1:
+                current_location = potential_next_steps.pop()
+                visited_set.add((current_location.x, current_location.y))
+                pe.length += 1
+
+            #If it's more than one step, we need to create a new node edge for each step, and add it to the potential edges
+            elif len(potential_next_steps) > 1:
+                pe.length += 1
+                #Create and add new node
+                node_set.add((current_location.x, current_location.y))
+
+                #Close current edge
+                closed_current_edge = True
+                pe.end_x = current_location.x
+                pe.end_y = current_location.y
+                known_edges.add(pe)
+                
+                #Create new edges
+                for pns in potential_next_steps:
+                    if ((pns.x, pns.y)) in visited_set:
+                        print("Abandoning")
+                    if ((pns.x, pns.y)) not in visited_set:
+                        new_edge = edge(current_location.x, current_location.y, pns.direction_of_travel)
+                        potential_edges.add(new_edge)
+
+#AT THIS POINT I HAVE THE GRAPH of NODES AND EDGES
+node_set_objects = set()
+for n in node_set:
+    node_set_objects.add(node(n[0], n[1]))
+
+for e in known_edges:
+    #Attach end to start
+    starting_node = list(filter(lambda x: x.x == e.start_x and x.y == e.start_y, node_set_objects))[0]
+    starting_node.neighbors.add((e.end_x, e.end_y, e.length))
+
+    #Attach start to end
+    ending_node = list(filter(lambda x: x.x == e.end_x and x.y == e.end_y, node_set_objects))[0]
+    ending_node.neighbors.add((e.start_x, e.start_y, e.length))
+    
+print("BUILT THE GRAPH")
+#At this point I have nodes with the edges attached in node_set_objects
+#Now I need to do the traversal and find the paths
+
+"""
+Approach for this part
+- Start at the starting node
+- Need to basically do the DFS from the starting node again, but already have the neighbors
+"""
+
+successful_path_lengths = []
+potential_paths = []
+
+initial_path = path(starting_x, starting_y, 0)
+initial_path.visited_points.add((starting_x, starting_y))
 potential_paths.append(initial_path)
 
 while len(potential_paths) > 0:
-    print("Number of potential paths exploring - " + str(len(potential_paths))) 
     pp = potential_paths[0]
     end_of_current_path = False
+
     while end_of_current_path == False:
         #First try to handle end here
-        #print("Latest location - " + str(pp.latest_location.x) + "," + str(pp.latest_location.y))
-        if pp.latest_location.x == ending_x and pp.latest_location.y == ending_y:
+        if pp.latest_x == ending_x and pp.latest_y == ending_y:
             print("Found a path to the end with steps - " + str(pp.path_length))
             successful_path_lengths.append(pp.path_length)
             potential_paths.remove(pp)
             end_of_current_path = True
 
-        if end_of_current_path == False:                
-            potential_next_steps = find_potential_next_steps(pp.latest_location)
-            potential_step_counter = 1
-            
-            if len(potential_next_steps) >= 1: 
-                while len(potential_next_steps) > 0:
-                    # Cretae a map point that represents the next location, including point, char, and direction of travel
-                    next_step = potential_next_steps.pop()
-                    next_step_for_comparison = copy.deepcopy(next_step)
-                    next_step_for_comparison.traveldir = ''
-                    
-                    if next_step_for_comparison not in pp.visited_points:
-                        pp.visited_points.add(next_step_for_comparison)
-                        
-                        #Populate the point with the data
-                        next_step_on_path = map_point(next_step.x, next_step.y, '')
-                        char = (list(filter(lambda x: x.x == next_step.x and x.y == next_step.y, hiking_map_set))[0]).mapchar
-                        next_step_on_path.mapchar = char
-                        next_step_on_path.direction_of_travel = next_step.traveldir
-                        
-                        #Update the current path if this is the first one we are testing - Update path with this point and increment length
-                        if potential_step_counter == 1:
-                            pp.latest_location = next_step_on_path #Note to self, already updating the ncurrent paths latest location and length to the first result even though we clone later
-                            pp.path_length = pp.path_length + 1
-                        #If there is more than one point returned, we won't just update current one, we spawn a new path
-                        
-                        elif potential_step_counter > 1:
-                            #print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
-                            new_path_copy = copy.deepcopy(pp)
-                            new_path_copy.latest_location = next_step_on_path #Note - This overrides the fishy behavior above of updating fcurrentpath before copying, as we're basiclly getting it for it's length
-                            new_path_copy.path_length = new_path_copy.path_length
-                            potential_paths.append(new_path_copy)
+        else:
+            found_something = False
+            neighbor_counter = 0
+            #FIND NEIGHBORS - These are already attached to the node objects
+            node_neighbors = list(filter(lambda x: x.x == pp.latest_x and x.y == pp.latest_y, node_set_objects))[0].neighbors
+            for n in node_neighbors:
+                #Check if we've already visited the neighbor
+                if (n[0], n[1]) not in pp.visited_points:
+                    if neighbor_counter == 0:
+                        #Update main path
+                        pp.latest_x = n[0]
+                        pp.latest_y = n[1]
+                        pp.path_length += n[2]
+                        pp.visited_points.add((n[0], n[1]))
+                        neighbor_counter += 1
+                        found_something = True
                     else:
-                        print("Next step is in visited set, this path is a dead end - nothing to remove, we are just not doing anythingiwth this next point")    
-                    potential_step_counter +=1 
-print("Longest - " + str(max(successful_path_lengths)))
+                        #Create new path
+                        print("Creating new path at " + str(pp.latest_x) + "," + str(pp.latest_y))
+                        new_path = copy.deepcopy(pp)
+                        new_path.latest_x = n[0]
+                        new_path.latest_y = n[1]
+                        new_path.path_length += n[2]
+                        new_path.visited_points.add((n[0], n[1]))
+                        potential_paths.append(new_path)
+                        found_something = True
+            #MAYBE I NEED TO HANDLE DISCARDING PATHS IF I CANT GO ANYWHERE
+            if found_something == False:
+                print("Found nothing, discarding")
+                potential_paths.remove(pp)
+                end_of_current_path = True
+
+print("Debugging PArt 2")
