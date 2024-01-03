@@ -77,21 +77,8 @@ def find_potential_next_steps(current_point):
 
     return potential_next_steps
 
-"""
-#BUG - THIS CANT BE WORKING BECAUSE I TOUCH MORE STEPS THAN THERE ARE IN THE GRID WHEN I KEEP IT RUNNING - SET COMPARE IS BROKEN
-    potential_next_steps_not_visited = set()
-    for pns in potential_next_steps:
-        temp_result = list(filter(lambda x: x.x == pns.x and x.y == pns.y, visited_points)) #MORE DEBUGGING
-        if len(temp_result) == 0: #Change this to only add ones not visited
-            potential_next_steps_not_visited.add(pns)
-            #print("ERROR")
-            #potential_next_steps.remove(pns) #GETTING RUNTIME ERROR HERE BECAUSE I"M CHANGING SET SIZE WHEN REMOVING, MAYBE COPY?
-
-    return potential_next_steps_not_visited
-"""
-
-f = open("Day23TestInput.txt")
-#f = open("Day23Input.txt")
+#f = open("Day23TestInput.txt")
+f = open("Day23Input.txt")
 
 hiking_map = []
 for l in f:
@@ -121,41 +108,19 @@ ending_pt = list(filter(lambda x: x.x == ending_x and x.y == ending_y, hiking_ma
 successful_path_lengths = []
 potential_paths = [] #Making this a list as we are going to need to be updating this
 
-"""
-Overall approach thoughts for algo:
-- Build list of potential paths - DONE
-- Build next step options function to find next steps - HAVE A DRAFT OF THIS
-- For each cycle, take a step down each path
-    - Start down the path
-    - If there are options, start a new path that is a clone, and add next option for each
-    - if next step for any option is null, remove from set
-    - if next step for any option is the end, tkae it, add 1 and add to successful path lengths set adn remove from paths
-
-"""
 initial_path = path(starting_pt, 0)
 initial_path.visited_points.add(xy_point(starting_x, starting_y, ''))
 potential_paths.append(initial_path)
 
-#OVERALL NEED TO RESTRUCTURE THE LOGIC HERE - WE NEED TO KEEP TRACK OF VISITED POINTS FOR A PATH NOT GLOBALLY BECAUSE IT IS FOR A PATH
-# Consider updating the logic to be follow a path to teh end and spawn paths, but then pick off a new path
-"""
-Pseudocode for update approach:
-- Update path with visited set
-- Pick off potential path
-    - follow until end spawning paths along the way
-    - Once at the end remove and pick new path
-"""
-
 while len(potential_paths) > 0:
-    #print("Number of potential paths exploring - " + str(len(potential_paths)))
-    
+    print("Number of potential paths exploring - " + str(len(potential_paths))) 
     pp = potential_paths[0]
     end_of_current_path = False
     while end_of_current_path == False:
-
         #First try to handle end here
+        #print("Latest location - " + str(pp.latest_location.x) + "," + str(pp.latest_location.y))
         if pp.latest_location.x == ending_x and pp.latest_location.y == ending_y:
-            #print("Found a path to the end with steps - " + str(pp.path_length))
+            print("Found a path to the end with steps - " + str(pp.path_length))
             successful_path_lengths.append(pp.path_length)
             potential_paths.remove(pp)
             end_of_current_path = True
@@ -187,7 +152,7 @@ while len(potential_paths) > 0:
                         #If there is more than one point returned, we won't just update current one, we spawn a new path
                         
                         elif potential_step_counter > 1:
-                            #print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
+                            print("Starting new path at - " + str(next_step_on_path.x) + "," + str(next_step_on_path.y))
                             new_path_copy = copy.deepcopy(pp)
                             new_path_copy.latest_location = next_step_on_path #Note - This overrides the fishy behavior above of updating fcurrentpath before copying, as we're basiclly getting it for it's length
                             new_path_copy.path_length = new_path_copy.path_length
