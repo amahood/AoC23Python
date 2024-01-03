@@ -173,10 +173,11 @@ visited_set.add((starting_x, starting_y))
 
 while len(potential_edges) > 0:
 
-    print("Number of potential edges to close - " + str(len(potential_edges))) 
+    #print("Number of potential edges to close - " + str(len(potential_edges))) 
     pe = potential_edges.pop()    
     current_location = xy_point(pe.start_x, pe.start_y, pe.dir_from_start)
     
+    #I Change my current location here but haven't updated length
     if pe.dir_from_start == 'D':
         current_location.x += 1
     elif pe.dir_from_start == 'U':
@@ -185,44 +186,46 @@ while len(potential_edges) > 0:
         current_location.y -= 1
     elif pe.dir_from_start == 'R':
         current_location.y += 1
-
+    pe.length += 1 #This handles updating length for first step along any new path
+    
     closed_current_edge = False
 
     while closed_current_edge == False:
         
         #Handle the end first
         if current_location.x == ending_x and current_location.y == ending_y:
-            #Close current edge
+            #Close current edge - #Already took the first step above so length is correct if we hit first time, need to check below
             closed_current_edge = True
             pe.end_x = current_location.x
             pe.end_y = current_location.y
-            pe.length += 1
             known_edges.add(pe)
+            print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
 
         else:  
             potential_next_steps = find_potential_next_steps(current_location)
             #If it's only one step, we can just update location, update, length, and go again
             if len(potential_next_steps) == 1:
                 current_location = potential_next_steps.pop()
-                visited_set.add((current_location.x, current_location.y))
+                visited_set.add((current_location.x, current_location.y)) #We've basically taken the step forward at this point
                 pe.length += 1
 
             #If it's more than one step, we need to create a new node edge for each step, and add it to the potential edges
             elif len(potential_next_steps) > 1:
-                pe.length += 1
+                #pe.length += 1 #HMMMM not sure we need to do this
                 #Create and add new node
                 node_set.add((current_location.x, current_location.y))
 
-                #Close current edge
+                #Close current edge - we stepped forward in the previous iteration with one step, updated length there and current location, so we shouldn't need to update anything
                 closed_current_edge = True
                 pe.end_x = current_location.x
                 pe.end_y = current_location.y
                 known_edges.add(pe)
+                print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
                 
                 #Create new edges
                 for pns in potential_next_steps:
-                    if ((pns.x, pns.y)) in visited_set:
-                        print("Abandoning")
+                    #if ((pns.x, pns.y)) in visited_set:
+                        #print("Abandoning")
                     if ((pns.x, pns.y)) not in visited_set:
                         new_edge = edge(current_location.x, current_location.y, pns.direction_of_travel)
                         potential_edges.add(new_edge)
@@ -301,5 +304,7 @@ while len(potential_paths) > 0:
                 print("Found nothing, discarding")
                 potential_paths.remove(pp)
                 end_of_current_path = True
+
+print("Longest path - " + str(max(successful_path_lengths)))
 
 print("Debugging PArt 2")
