@@ -101,27 +101,8 @@ def find_potential_next_steps(current_point):
 
     return potential_next_steps
 
-def is_junction(current_point):
-    is_junction = False
-    
-    down = (list(filter(lambda x: x.x == current_point.x+1 and x.y == current_point.y, hiking_map_set))[0]).mapchar
-    up = list(filter(lambda x: x.x == current_point.x-1 and x.y == current_point.y, hiking_map_set))[0].mapchar
-    left = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y-1, hiking_map_set))[0].mapchar
-    right = list(filter(lambda x: x.x == current_point.x and x.y == current_point.y+1, hiking_map_set))[0].mapchar
-
-    if down != '#' and up != '#' and left != '#':
-        is_junction = True
-    elif down != '#' and up != '#' and right != '#':
-        is_junction = True
-    elif down != '#' and left != '#' and right != '#':
-        is_junction = True
-    elif up != '#' and left != '#' and right != '#':
-        is_junction = True
-
-    return is_junction
-
-f = open("Day23TestInput.txt")
-#f = open("Day23Input.txt")
+#f = open("Day23TestInput.txt")
+f = open("Day23Input.txt")
 
 hiking_map = []
 for l in f:
@@ -199,7 +180,7 @@ while len(potential_edges) > 0:
             pe.end_x = current_location.x
             pe.end_y = current_location.y
             known_edges.add(pe)
-            print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
+            #print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
 
         else:  
             potential_next_steps = find_potential_next_steps(current_location)
@@ -220,7 +201,7 @@ while len(potential_edges) > 0:
                 pe.end_x = current_location.x
                 pe.end_y = current_location.y
                 known_edges.add(pe)
-                print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
+                #print("Found the end, closing edge with length - " + str(pe.length) + " from " + str(pe.start_x) + "," + str(pe.start_y) + " to " + str(pe.end_x) + "," + str(pe.end_y))
                 
                 #Create new edges
                 for pns in potential_next_steps:
@@ -230,7 +211,6 @@ while len(potential_edges) > 0:
                         new_edge = edge(current_location.x, current_location.y, pns.direction_of_travel)
                         potential_edges.add(new_edge)
 
-#AT THIS POINT I HAVE THE GRAPH of NODES AND EDGES
 node_set_objects = set()
 for n in node_set:
     node_set_objects.add(node(n[0], n[1]))
@@ -243,7 +223,15 @@ for e in known_edges:
     #Attach start to end
     ending_node = list(filter(lambda x: x.x == e.end_x and x.y == e.end_y, node_set_objects))[0]
     ending_node.neighbors.add((e.start_x, e.start_y, e.length))
-    
+
+print("NODES AND NEIGHBORS")
+for n in node_set_objects:
+    temp = str(n.x) + "," + str(n.y) + " - "
+    for neighbor in n.neighbors:
+        temp = temp + " ("+str(neighbor[0])+","+str(neighbor[1])+"," + str(neighbor[2])+")"
+    print(temp)
+
+
 print("BUILT THE GRAPH")
 #At this point I have nodes with the edges attached in node_set_objects
 #Now I need to do the traversal and find the paths
@@ -268,7 +256,6 @@ while len(potential_paths) > 0:
     while end_of_current_path == False:
         #First try to handle end here
         if pp.latest_x == ending_x and pp.latest_y == ending_y:
-            print("Found a path to the end with steps - " + str(pp.path_length))
             successful_path_lengths.append(pp.path_length)
             potential_paths.remove(pp)
             end_of_current_path = True
@@ -291,7 +278,7 @@ while len(potential_paths) > 0:
                         found_something = True
                     else:
                         #Create new path
-                        print("Creating new path at " + str(pp.latest_x) + "," + str(pp.latest_y))
+                        #print("Creating new path at " + str(pp.latest_x) + "," + str(pp.latest_y))
                         new_path = copy.deepcopy(pp)
                         new_path.latest_x = n[0]
                         new_path.latest_y = n[1]
@@ -301,10 +288,7 @@ while len(potential_paths) > 0:
                         found_something = True
             #MAYBE I NEED TO HANDLE DISCARDING PATHS IF I CANT GO ANYWHERE
             if found_something == False:
-                print("Found nothing, discarding")
                 potential_paths.remove(pp)
                 end_of_current_path = True
 
 print("Longest path - " + str(max(successful_path_lengths)))
-
-print("Debugging PArt 2")
