@@ -22,10 +22,12 @@ class intersection():
         self.x = x
         self.y = y
 
-f = open("Day24TestInput.txt")
+#f = open("Day24TestInput.txt")
+f = open("Day24Input.txt")
 
-UPPERBOUND = 27
-LOWERBOUND = 7
+LOWERBOUND = 200000000000000
+UPPERBOUND = 400000000000000
+
 
 #Parse input to populate path classes
 hailstones = []
@@ -40,17 +42,17 @@ for l in f:
     hailstones.append(h_path)
 
 intersections = []
+count_par = 0
 
 for ha in range(0, len(hailstones)):
     for hb in range(ha+1, len(hailstones)):
         a = hailstones[ha]
         b = hailstones[hb]
         
-        #TODO CHECK FOR PARALLEL LINES
         slope_a = a.vy/a.vx
         slope_b = b.vy/b.vx
         is_parallel = (slope_a == slope_b)
-
+    
         if is_parallel == False:
             Ta = (b.vy*(a.px-b.px)/b.vx + b.py - a.py ) / (a.vy - (b.vy*a.vx)/b.vx)
             Tb = ((a.vx*Ta) + a.px - b.px)/b.vx
@@ -59,5 +61,7 @@ for ha in range(0, len(hailstones)):
             int_y = a.py + a.vy*Ta
             if Ta > 0 and Tb > 0 and int_x >= LOWERBOUND and int_x <= UPPERBOUND and int_y >= LOWERBOUND and int_y <= UPPERBOUND:
                 intersections.append(intersection(int_x, int_y))
+            else:
+                print("Failed comparison")
 
 print(str(len(intersections)))
