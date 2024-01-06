@@ -39,8 +39,8 @@ def find_starting_direction(char, entrydir):
     return 'none'
 
 
-f = open("Day16TestInput.txt")
-#f = open("Day16Input.txt")
+#f = open("Day16TestInput.txt")
+f = open("Day16Input.txt")
 
 map = []
 
@@ -55,6 +55,10 @@ Approach for populating starting beams for Part 2:
 - Find starting direction from function by passing in char and entry direction
 - if not none, create beam and add to list
 """
+
+
+
+
 starting_beams = []
 #Top row starting points
 for i in range(len(map[0])):
@@ -200,7 +204,8 @@ for s in starting_beams:
                 same_cycle_count = 0
                 previous_energized_count = energized_count
 
-            if same_cycle_count == 100000:
+            if same_cycle_count == 5000000:
+                print("REPEATED ENOUGH")
                 repeated_enough = True
                 break
         #print("Total hashes: " + str(energized_count))
