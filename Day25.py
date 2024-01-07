@@ -6,6 +6,8 @@ Potential Approach:
 - Run all the above by removing 3 different edges, but number of combinations is going to be too high, something 3^
 """
 
+import copy
+
 class edge:
     def __init__(self, left, right):
         self.left = left
@@ -52,6 +54,7 @@ def find_number_of_connected_nodes(nodes, start_node):
     return len(visited_set)
 
 f = open("Day25TestInput.txt")
+#f = open("Day25Input.txt")
 
 edges = set()
 
@@ -67,14 +70,51 @@ for l in f:
  
 print("Number of edges = " + str(len(edges)))
 
-#Build graph from edges - LIEKLY NEED TO ENCAPSULATE THIS INTO A FUNCTION TO CALL AFTER REMOVING EDGES
-nodes = set()
-nodes = build_graph_from_edges(edges)
-    
-#Should have graph at this point
-print("Number of nodes = " + str(len(nodes)))
+looper = 0
+found_halver = False
+for i in range(len(edges)):
+    for j in range(i+1, len(edges)):
+        for k in range(j+1, len(edges)):
+            #Remove 3 edges
+            edgecopy = copy.deepcopy(edges)
 
-node_testing = "jqt"
-number_we_can_reach = find_number_of_connected_nodes(nodes, node_testing)
-#Now need to build BFS to find number of nodes each node can reach
-print("Number we can reach from test node to test BFS - " + str(number_we_can_reach))
+            
+            #node1 = str(list(edgecopy)[i].left) + "/" + str(list(edgecopy)[i].right)
+            #edgecopy.remove(list(edgecopy)[i])
+            #node2 = str(list(edgecopy)[j-1].left) + "/" + str(list(edgecopy)[j-1].right)
+            #edgecopy.remove(list(edgecopy)[j-1])
+            #node3 = str(list(edgecopy)[k-2].left) + "/" + str(list(edgecopy)[k-2].right)
+            #edgecopy.remove(list(edgecopy)[k-2])
+            
+            edgecopy.remove(list(filter(lambda x: x.left == 'pzl' and x.right == 'hfx', edgecopy))[0])
+            edgecopy.remove(list(filter(lambda x: x.left == 'cmg' and x.right == 'bvb', edgecopy))[0])
+            edgecopy.remove(list(filter(lambda x: x.left == 'jqt' and x.right == 'nvd', edgecopy))[0])
+
+            #Then go through the other existing code of building graph and doing BFS from each node
+            nodes = set()
+            nodes = build_graph_from_edges(edgecopy)
+    
+            reachable_count_set = set()
+            #Find number of nodes we can reach from each node
+            for n in nodes:
+                reachable = find_number_of_connected_nodes(nodes, n.name)
+                reachable_count_set.add(reachable)
+
+            if len(reachable_count_set) == 2:
+                print("Number of unique counts we can reach this round = " + str(len(reachable_count_set)))
+                #print edges we removed
+                #print("Edges removed: " + node1 + ", " + node2 + ", " + node3)
+                product = reachable_count_set.pop() * reachable_count_set.pop()
+                found_halver = True
+                break
+            looper += 1
+        if found_halver:
+            break
+    if found_halver:
+        break
+print("Product of set sizes - " + str(product))
+
+
+
+
+
