@@ -56,9 +56,6 @@ Approach for populating starting beams for Part 2:
 - if not none, create beam and add to list
 """
 
-
-
-
 starting_beams = []
 #Top row starting points
 for i in range(len(map[0])):
@@ -92,27 +89,40 @@ totals = []
 for s in starting_beams:
     print("Starting beam at " + str(s.currentx) + ", " + str(s.currenty) + " with direction " + s.last_direction)
 
-    #EVERYTHING BELOW HERE NEEDS TO BE REPEATED FOR EACH ATTEMPT, NEED TO SEED THE POINTS FIRST, REMOVE THE INIT CODE BELOW
+    #EVERYTHING BELOW HERE NEEDS TO BE REPEATED FOR EACH ATTEMPT - STARTING CLEAN FOR NEW ENTRY POINT
+
+    #Populate energized tiles set with '.' first
     energized_tiles = []
     for i in range(len(map)):
         energized_tiles.append([])
         for j in range(len(map[i])):
             energized_tiles[i].append('.')
 
+    #Start out by adding our first beam into the beam set, and set our first tile as '#'
     beams = []
     beams.append(s)
     energized_tiles[s.currentx][s.currenty] = '#'
 
+    #WIP - VISITED SET LOGIC
+    #Set up visited set to track visited tiles with direction
+    visited = set()
+    visited.add((s.currentx, s.currenty, s.last_direction))
+
+    #Set up tracking variables for tracking our count of energized tiles and what we need to know if we have repeated enough
     energized_count = 1
     same_cycle_count = 0
     previous_energized_count = 0
     repeated_enough = False
+
+    #While there are still beams in the set, take a step for each beam
     while len(beams) > 0 and repeated_enough == False:
-        #print("BEAM COUNT - " + str(len(beams)))
-        for current_beam in beams: #MIGHT NEED TO TURN THIS INTO A POP BECAUSE I"M GOING TO GET A SET SIZE CHANGE ERROR
+
+        #This cycles through each beam
+        for current_beam in beams:
             next_char = ''
             delete_current_beam = False
-            #Take step for each beam - current location and direction will be updated after this
+
+            #Take step for each beam - current location and direction will be updated after this, and next_char will have the char at the new location to assess for beam splitting
             if current_beam.last_direction == 'right':
                 if current_beam.currenty + 1 < len(map[0]):
                     next_char = map[current_beam.currentx][current_beam.currenty + 1]
@@ -147,7 +157,12 @@ for s in starting_beams:
                     current_beam.last_direction = 'up'
                 else:
                     delete_current_beam = True
-                    
+
+            #WIP - VISITED SET LOGIC   
+            if ((current_beam.currentx, current_beam.currenty, current_beam.last_direction)) in visited:
+                delete_current_beam = True
+            else:
+                visited.add((current_beam.currentx, current_beam.currenty, current_beam.last_direction))
 
             #Add new step to energized set
             if delete_current_beam == False:
@@ -195,22 +210,22 @@ for s in starting_beams:
 
             if delete_current_beam == True:
                 beams.remove(current_beam)
-                #print("Deleting beam at " + str(current_beam.currentx) + ", " + str(current_beam.currenty))
 
-            #NEED TO GET TOTAL COUNT OF HASHES IN THE ENERGIZED TILES SET
+            #Logic to check if we have repeated enough to satisfy the end condition and break out of the loop
             if energized_count == previous_energized_count:
                 same_cycle_count += 1
             else:
                 same_cycle_count = 0
                 previous_energized_count = energized_count
 
-            if same_cycle_count == 5000000:
+            if same_cycle_count == 10000000:
                 print("REPEATED ENOUGH")
                 repeated_enough = True
                 break
-        #print("Total hashes: " + str(energized_count))
-    #Do stuff that we need to do at the end of each pass
+        
+    #Do stuff that we need to do at the end of each pass - print out energized tiles and add to totals
     print("Energized Tiles - " + str(energized_count))
     totals.append(energized_count)
+    #HEre we have effectively completed what was PArt 1 for a given starting location and direction
 
 print("MAX TOTAL - " + str(max(totals)))
