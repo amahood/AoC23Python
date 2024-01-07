@@ -77,18 +77,14 @@ for i in range(len(edges)):
         for k in range(j+1, len(edges)):
             #Remove 3 edges
             edgecopy = copy.deepcopy(edges)
+            
+            node1 = str(list(edges)[i].left) + "/" + str(list(edges)[i].right)
+            node2 = str(list(edges)[j].left) + "/" + str(list(edges)[j].right)
+            node3 = str(list(edges)[k].left) + "/" + str(list(edges)[k].right)
 
-            
-            #node1 = str(list(edgecopy)[i].left) + "/" + str(list(edgecopy)[i].right)
-            #edgecopy.remove(list(edgecopy)[i])
-            #node2 = str(list(edgecopy)[j-1].left) + "/" + str(list(edgecopy)[j-1].right)
-            #edgecopy.remove(list(edgecopy)[j-1])
-            #node3 = str(list(edgecopy)[k-2].left) + "/" + str(list(edgecopy)[k-2].right)
-            #edgecopy.remove(list(edgecopy)[k-2])
-            
-            edgecopy.remove(list(filter(lambda x: x.left == 'pzl' and x.right == 'hfx', edgecopy))[0])
-            edgecopy.remove(list(filter(lambda x: x.left == 'cmg' and x.right == 'bvb', edgecopy))[0])
-            edgecopy.remove(list(filter(lambda x: x.left == 'jqt' and x.right == 'nvd', edgecopy))[0])
+            edgecopy.remove(list(filter(lambda x: x.left == list(edges)[i].left and x.right == list(edges)[i].right, edgecopy))[0])
+            edgecopy.remove(list(filter(lambda x: x.left == list(edges)[j].left and x.right == list(edges)[j].right, edgecopy))[0])
+            edgecopy.remove(list(filter(lambda x: x.left == list(edges)[k].left and x.right == list(edges)[k].right, edgecopy))[0])
 
             #Then go through the other existing code of building graph and doing BFS from each node
             nodes = set()
@@ -103,7 +99,7 @@ for i in range(len(edges)):
             if len(reachable_count_set) == 2:
                 print("Number of unique counts we can reach this round = " + str(len(reachable_count_set)))
                 #print edges we removed
-                #print("Edges removed: " + node1 + ", " + node2 + ", " + node3)
+                print("Edges removed: " + node1 + ", " + node2 + ", " + node3)
                 product = reachable_count_set.pop() * reachable_count_set.pop()
                 found_halver = True
                 break
