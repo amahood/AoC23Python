@@ -103,20 +103,14 @@ for s in starting_beams:
     beams.append(s)
     energized_tiles[s.currentx][s.currenty] = '#'
 
-    #WIP - VISITED SET LOGIC
     #Set up visited set to track visited tiles with direction
     visited = set()
     visited.add((s.currentx, s.currenty, s.last_direction))
 
-    #Set up tracking variables for tracking our count of energized tiles and what we need to know if we have repeated enough
     energized_count = 1
-    same_cycle_count = 0
-    previous_energized_count = 0
-    repeated_enough = False
 
     #While there are still beams in the set, take a step for each beam
-    while len(beams) > 0 and repeated_enough == False:
-
+    while len(beams) > 0 :
         #This cycles through each beam
         for current_beam in beams:
             next_char = ''
@@ -158,7 +152,6 @@ for s in starting_beams:
                 else:
                     delete_current_beam = True
 
-            #WIP - VISITED SET LOGIC   
             if ((current_beam.currentx, current_beam.currenty, current_beam.last_direction)) in visited:
                 delete_current_beam = True
             else:
@@ -210,18 +203,6 @@ for s in starting_beams:
 
             if delete_current_beam == True:
                 beams.remove(current_beam)
-
-            #Logic to check if we have repeated enough to satisfy the end condition and break out of the loop
-            if energized_count == previous_energized_count:
-                same_cycle_count += 1
-            else:
-                same_cycle_count = 0
-                previous_energized_count = energized_count
-
-            if same_cycle_count == 10000000:
-                print("REPEATED ENOUGH")
-                repeated_enough = True
-                break
         
     #Do stuff that we need to do at the end of each pass - print out energized tiles and add to totals
     print("Energized Tiles - " + str(energized_count))
